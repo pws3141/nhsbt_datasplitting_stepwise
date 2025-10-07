@@ -1,5 +1,6 @@
 ---
-title: "<br>An Example Report"
+title: "<br>How do training–test splits and stepwise selection affect model robustness?"
+subtitle: "Some examples using the `GBSG` dataset."
 author: 
   - name: Paul Smith
     email: paul.smith9@nhsbt.nhs.uk
@@ -21,7 +22,8 @@ format:
     code-annotations: hover
     fig-width: 6
     fig-asp: 0.618
-#execute:
+execute:
+  freeze: auto
   #echo: false
   #warning: false
 include-in-header:
@@ -30,21 +32,203 @@ include-in-header:
 bibliography: ref.bib
 ---
 
-# Some Words
+# Introduction
 
-{{< lipsum 1 >}}
+Here, I'm showing -- using examples -- how splitting the data into training and test sets, and using stepwise variable selection, can (does?) result in non-robust models.
 
-# Some Code
+Data splitting
+: where a dataset is split into *training* and *test* samples by a random process. The training sample is used for model development, and the test sample for model validation.
 
-I would recommend reading @von2007theory. 
+Stepwise variable selection
+: selecting variables used in the final model in a stepwise manner. Either starting with the null model and adding predictors one-by-one, or starting with all predictors and removing them.
 
-{{< lipsum 1 >}}
+## Data splitting
+
+The issues with data-splitting are discussed in @harrell2001regression [Section 5.3.3]. These include
+
+1. Data-splitting greatly reduces the sample size for both model development and model testing. 
+2. Repeating the process with a different split can result in different assessments of predictive accuracy.
+3. It does not validate the final model, only a model developed on a subset of the data.
+
+Number (3) is discussed further [here](https://www.fharrell.com/post/split-val/), specifically:
+
+> When feature selection is done, data splitting validates just one of a myriad of potential models. In effect it validates an example model. Resampling (repeated cross-validation or the bootstrap) validate the process that was used to develop the model. Resampling is honest in reporting the results because it depicts the uncertainty in feature selection, e.g., the disagreements in which variables are selected from one resample to the next.[^note1]
+
+[^note1]: That is, for each bootstrap sample, some sort of variable selection is done (*e.g.* stepwise, or lasso). The proportion of bootstrap samples where each variable is chosen in the model can then be reported to give an idea of the uncertainty in variable selection.
+
+A good primer on the evaluation of clinical prediction models is given by @collins2024evaluation. In this, the authors state,
+
+> Randomly splitting obviously creates two smaller datasets, and often the full dataset is not even large enough to begin with. Having a dataset that is too small to develop the model increases the likelihood of overfitting and producing an unreliable model, and having a test set that is too small will not be able to reliably and precisely estimate model performance—this is a clear waste of precious information.
+
+Even more succinctly, @steyerberg2018validation states,
+
+> random data splitting should be abolished for validation of prediction models.
+
+
+## Stepwise variable selection
+
+To quote @harrell2001regression[Section 4.3],
+
+> Stepwise variable selection has been a very popular technique for many years, but if this procedure had just been proposed as a statistical method, it would most likely be rejected because it violates every principle of statistical estimation and hypothesis testing.
+
+Some of the issues include:
+
+1. It yields $R^2$ values that are biased high.
+2. The $F$ and $\chi^2$ test statistics do not have the claimed distribution.
+3. The standard errors of regression coefficient estimates are biased low and confidence intervals for effects and predicted values are falsely narrow.
+4. It yields $P$-values that are too small (due to severe multiple comparison problems).
+5. The regression coefficients are biased high in absolute value. That is, if $\hat \beta > 0$, $E(\hat \beta | P < 0.05, \hat \beta > 0) > \beta$.
+
+@copas1991estimating explain how (5) occurs, 
+
+> The choice of the variables to be included depends on estimated regression coefficients rather than their true values, and so $X_j$ is more likely to be included if its regression coefficient is over-estimated than if its regression coefficient is underestimated.
+
+# Examples
+
+First, we'll load some packages.
 
 ```{r}
-x <- 1
-y <- 2
+#| warnings: false
 
-x + y
+library(data.table)    
+library(survival)
+library(broom) # tidy
+library(mlr3)
+library(mlr3learners)
+library(mlr3proba) # survival
+library(mlr3fselect) # feature selection
+library(lattice)
 ```
 
-{{< lipsum 1 >}}
+and create an `{mlr3}` Task.^[I'm using [mlr3](https://mlr3.mlr-org.com/) for the first example because it makes it easy to do repeated data-splitting and model fitting. For the second example I'll use the survival package directly, as it allows us to do stepwise variable selection.]
+
+```{r task}
+task = tsk("gbsg")
+task
+```
+
+## Data splitting
+
+```{r modelfitting}
+set.seed(1)
+iters <- 100
+
+learner = lrn("surv.coxph")
+
+holdouts = rsmps(rep("holdout", iters), ratio = 0.7)
+design = benchmark_grid(task, learner, holdouts)
+bmr = benchmark(design, store_models = TRUE)
+```
+
+```{r cstat}
+# C-statistic
+acc = bmr$score(msr("surv.cindex"))
+summary(acc[, c(surv.cindex)])
+densityplot(~ surv.cindex, data = acc)
+```
+
+```{r params}
+# estimated (donor) parameters
+
+bmrdt <- as.data.table(bmr)
+learners <- bmrdt[, learner]
+coefs <- rbindlist(
+  lapply(learners, \(m) as.list(m$model$coefficients))
+)
+
+# plot
+# reshape to long format
+coef_long = melt(coefs, 
+                 measure.vars = names(coefs), 
+                 variable.name = "term", 
+                 value.name = "estimate")
+
+#bwplot(exp(estimate) ~ term, data = coef_long, 
+       #xlab = "Coefficient", ylab = "Model estimates")
+stripplot(exp(estimate) ~ term, data = coef_long, 
+       xlab = "Coefficient", ylab = "Model estimates")
+```
+
+
+## Data splitting with stepwise selection
+
+```{r}
+# load data
+gbsg <- as.data.table(mlr3::tsk("gbsg")$data())
+
+n_x <- nrow(gbsg)
+n1 <- 0.7 # size of training set
+
+set.seed(200)
+training_idx <- rbindlist(
+  lapply(seq_len(iters), function(i) {
+    idx <- sample(1:n_x, floor(n1 * n_x))
+    data.frame(.id = i, as.list(idx))
+  }
+  ),
+  use.names = FALSE
+)
+
+# change column names except '.id'
+old_names <- names(training_idx)
+new_names <- c(".id", paste0("idx_", seq_len(ncol(training_idx) - 1))) 
+setnames(training_idx, old = old_names, new = new_names)
+
+training_idx[1:5, 1:12]
+
+
+# split data into training and test sets
+# and obtain cox coefs
+models <- training_idx[, {
+  tmp_train <- gbsg[unlist(.SD)]
+  tmp_test <- gbsg[-unlist(.SD)]
+  # fit the full model to the training data
+  cox_full_tmp <- coxph(Surv(time, status) ~ .,
+                        data = tmp_train)
+  # use stepwise selection on training data
+  cox_step_tmp <- step(cox_full_tmp,
+                       direction = "both",
+                       trace = 0)
+  # get linear predictor on test data
+  lp_tmp <- predict(cox_step_tmp, 
+                    newdata = tmp_test, type = "lp")
+  # obtain c-statistic using linear predictor
+  # see callout note below for why `reverse = TRUE` is required
+  c_stat <- concordance(Surv(tmp_test$time, tmp_test$status) ~ lp_tmp, 
+                        reverse = TRUE) 
+  data.table(as.data.table(tidy(cox_step_tmp)),
+             c = c_stat$concordance)
+}, by = .id] 
+
+
+### plots
+
+# C-statistics
+c_stats <- models[, .(cstat = unique(c)), by = .id]
+#c_stats[order(cstat, decreasing = TRUE)]
+summary(c_stats[, cstat])
+densityplot(~ cstat, data = c_stats)
+
+# Model factors:
+# predictors in model
+model_variables <- models[, .(
+  terms_string = paste(
+    unique(sub("[0-9]+$", "", term)),
+    collapse = ", "
+  )
+), by = .id]
+
+model_variables
+
+proportion_model_variables <- model_variables[
+  , .(prop = nrow(.SD) / nrow(model_variables))
+  , by = terms_string]
+
+#proportion_model_variables
+proportion_model_variables[,
+           terms_string := factor(terms_string, levels = terms_string[order(prop)])]  
+
+barchart(terms_string ~ prop, proportion_model_variables)
+
+```
+
