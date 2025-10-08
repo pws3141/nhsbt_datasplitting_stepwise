@@ -30,7 +30,9 @@ jobs:
             "mlr3learners",
             "mlr3proba",
             "mlr3fselect",
-            "lattice"
+            "lattice",
+            "rmarkdown",
+            "knitr"
           ))'
 
       - name: Set up Quarto

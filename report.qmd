@@ -88,7 +88,7 @@ Some of the issues include:
 First, we'll load some packages.
 
 ```{r}
-#| warnings: false
+#| warning: false
 
 library(data.table)    
 library(survival)
@@ -110,6 +110,8 @@ task
 ## Data splitting
 
 ```{r modelfitting}
+#| output: false 
+
 set.seed(1)
 iters <- 100
 
