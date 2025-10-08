@@ -20,25 +20,10 @@ jobs:
         with:
           use-public-rspm: true   # Speeds up CRAN package installs
 
-      - name: Install required R packages
+      - name: Restore R packages
         run: |
-          Rscript -e 'install.packages(c(
-            "data.table",
-            "survival",
-            "broom",
-            "mlr3",
-            "mlr3learners",
-            "mlr3fselect",
-            "lattice",
-            "rmarkdown",
-            "knitr"
-          ))'
-          
-      - name: Install mlr3proba from mlr-org.r-universe.dev
-        run: |
-          Rscript -e 'install.packages(
-            "mlr3proba", repos = "https://mlr-org.r-universe.dev"
-          )'
+          R -e 'install.packages("renv")'
+          R -e 'renv::restore()'
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
