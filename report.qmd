@@ -20,7 +20,7 @@ format:
     ## Optional
     embed-resources: true
     code-annotations: hover
-    fig-width: 6
+    fig-width: 8
     fig-asp: 0.618
 execute:
   freeze: auto
@@ -34,13 +34,15 @@ bibliography: ref.bib
 
 # Introduction
 
-Here, I'm showing -- using examples -- how splitting the data into training and test sets, and using stepwise variable selection, can (does?) result in non-robust models.
+Here, I'm showing -- using examples -- how splitting the data into training and test sets, and using stepwise variable selection, can (does?) result in non-robust models. 
 
 Data splitting
 : where a dataset is split into *training* and *test* samples by a random process. The training sample is used for model development, and the test sample for model validation.
 
 Stepwise variable selection
 : selecting variables used in the final model in a stepwise manner. Either starting with the null model and adding predictors one-by-one, or starting with all predictors and removing them.
+
+
 
 ## Data splitting
 
@@ -83,6 +85,21 @@ Some of the issues include:
 
 > The choice of the variables to be included depends on estimated regression coefficients rather than their true values, and so $X_j$ is more likely to be included if its regression coefficient is over-estimated than if its regression coefficient is underestimated.
 
+To prevent regression coefficients being too large, Tibshirani's^[of *An
+Introduction to Statistical Learning* fame.] *lasso* procedure can be used
+[@tibshirani1996regression]. This shrinks coefficient estimates towards zero by
+including a constraint that the sum of absolute values of the coefficient
+estimates must be less than some $k$. Note that the lasso procedure shares many
+of stepwise's deficiencies, namely that there is a "low probability of
+selecting the 'correct' variables" (see [StackExchange](https://stats.stackexchange.com/questions/411035/does-lasso-suffer-from-the-same-problems-stepwise-regression-does/426805#426805) for some more information).
+
+@derksen1992backward found that when the stepwise procedure was used, the final
+model represented noise between $20\%$ and $74\%$ of the time, and the final
+model contained less than half of the actual number of authentic predictors. To
+see this in action, Frank Harrell has some simulations as part of his
+'Regression Modelling Strategies' [course
+notes](https://hbiostat.org/rmsc/multivar#sec-multivar-variable-selection). 
+
 # Examples
 
 First, we'll load some packages.
@@ -98,6 +115,9 @@ library(mlr3learners)
 library(mlr3proba) # survival
 library(mlr3fselect) # feature selection
 library(lattice)
+
+# number of random splits
+iters <- 100
 ```
 
 and create an `{mlr3}` Task.^[I'm using [mlr3](https://mlr3.mlr-org.com/) for the first example because it makes it easy to do repeated data-splitting and model fitting. For the second example I'll use the survival package directly, as it allows us to do stepwise variable selection.]
@@ -107,27 +127,32 @@ task = tsk("gbsg")
 task
 ```
 
+In the first example, I will look at the variation in the outputted estimated coefficients and C-statistics from `r iters` random training-test splits^[That is, 70\% of the observations will be randomly allocate to the training set, and the remainder to the test set. The model will be built on the training set and validated (*i.e.* C-statistic calculated) on the test set.]
+
+The second example is similar to the first, but with stepwise variable selection included in the model building step. This means that the predictors included in the model will change depending on the observations included in the training split.
+
 ## Data splitting
 
 ```{r modelfitting}
 #| output: false 
 
 set.seed(1)
-iters <- 100
 
+# using mlr3 syntax:
+
+# Create the Learner: Cox PH model
 learner = lrn("surv.coxph")
 
+# Benchmark grid: 100 different training-test sets
 holdouts = rsmps(rep("holdout", iters), ratio = 0.7)
 design = benchmark_grid(task, learner, holdouts)
+
+# build the models
 bmr = benchmark(design, store_models = TRUE)
 ```
 
-```{r cstat}
-# C-statistic
-acc = bmr$score(msr("surv.cindex"))
-summary(acc[, c(surv.cindex)])
-densityplot(~ surv.cindex, data = acc)
-```
+
+Now `r iters` models have been build, let's look at the coefficient estimates. Each dot in @fig-full-coefficients is one coefficient estimate.
 
 ```{r params}
 # estimated (donor) parameters
@@ -145,12 +170,28 @@ coef_long = melt(coefs,
                  variable.name = "term", 
                  value.name = "estimate")
 
-#bwplot(exp(estimate) ~ term, data = coef_long, 
-       #xlab = "Coefficient", ylab = "Model estimates")
-stripplot(exp(estimate) ~ term, data = coef_long, 
-       xlab = "Coefficient", ylab = "Model estimates")
 ```
 
+```{r}
+#| fig-cap: Strip plot showing the coefficient estimates from models built on the `r iter` different training sets.
+#| label: fig-full-coefficients
+
+
+stripplot(term ~ exp(estimate), data = coef_long,
+        xlab = "Coefficient", ylab = "Model estimates")
+```
+
+The associated C-statistics calculated on the test observation and given in @fig-full-cstats
+
+```{r cstat}
+#| fig-cap: Density plot of the C-statistics calcualcted on the 100 test sets.
+#| label: fig-full-cstats
+
+# C-statistic
+acc = bmr$score(msr("surv.cindex"))
+summary(acc[, c(surv.cindex)])
+densityplot(~ surv.cindex, data = acc)
+```
 
 ## Data splitting with stepwise selection
 
@@ -160,8 +201,10 @@ gbsg <- as.data.table(mlr3::tsk("gbsg")$data())
 
 n_x <- nrow(gbsg)
 n1 <- 0.7 # size of training set
+```
 
-set.seed(200)
+```{r}
+set.seed(1)
 training_idx <- rbindlist(
   lapply(seq_len(iters), function(i) {
     idx <- sample(1:n_x, floor(n1 * n_x))
@@ -220,7 +263,7 @@ model_variables <- models[, .(
   )
 ), by = .id]
 
-model_variables
+#model_variables
 
 proportion_model_variables <- model_variables[
   , .(prop = nrow(.SD) / nrow(model_variables))
