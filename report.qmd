@@ -107,10 +107,13 @@ First, we'll load some packages.
 ```{r}
 #| warning: false
 
+#renv::restore()
+
 library(data.table)    
 library(survival)
 library(broom) # tidy
 library(mlr3)
+library(mlr3viz)
 library(mlr3learners)
 library(mlr3proba) # survival
 library(mlr3fselect) # feature selection
@@ -130,6 +133,43 @@ task
 In the first example, I will look at the variation in the outputted estimated coefficients and C-statistics from `r iters` random training-test splits^[That is, 70\% of the observations will be randomly allocate to the training set, and the remainder to the test set. The model will be built on the training set and validated (*i.e.* C-statistic calculated) on the test set.]
 
 The second example is similar to the first, but with stepwise variable selection included in the model building step. This means that the predictors included in the model will change depending on the observations included in the training split.
+
+:::{.callout-note collapse="true"}
+# Building the Cox PH model on a single training sample
+
+Before we build `r iters` models on `r iters` random training sets, lets look at a single model, the coefficient point estimates, and their confidence intervals.
+
+Building the model:
+```{r}
+set.seed(16)
+
+# split the data into a random 70% training set, and 30% test set
+split = partition(task, ratio = 0.7)
+# create the Learner: Cox PH model
+cox = lrn("surv.coxph")
+# build the model
+cox$train(task, row_ids = split$train)
+```
+
+The hazard ratio estimates are shown in @fig-single-hr.
+
+```{r}
+#| fig-cap: "Hazard ratio estimates for a model built on a single 70% training set."
+#| label: fig-single-hr
+
+# plot the hazard ratio estimates
+autoplot(cox)
+```
+
+The C-statistic we get from this model when applied to the (unseen) test set is:
+```{r}
+# create predictions on test set
+preds = cox$predict(task, row_ids = split$test)
+# C-statistic of predictions
+preds$score(msr("surv.cindex"))
+```
+
+:::
 
 ## Data splitting
 
@@ -152,7 +192,7 @@ bmr = benchmark(design, store_models = TRUE)
 ```
 
 
-Now `r iters` models have been build, let's look at the coefficient estimates. Each dot in @fig-full-coefficients is one coefficient estimate.
+Now `r iters` models have been built, let's look at the hazard ratio estimates. Each dot in @fig-full-coefficients is one coefficient estimate. We can compare the spread of these estimates to the confidence intervals given in @fig-single-hr -- we see that they are similar. However, when the point estimate is the element that is used (for example, in donor risk indices), it is important to show how the particular choice of coefficient estimate affects the DRI.
 
 ```{r params}
 # estimated (donor) parameters
@@ -173,17 +213,17 @@ coef_long = melt(coefs,
 ```
 
 ```{r}
-#| fig-cap: Strip plot showing the coefficient estimates from models built on the `r iter` different training sets.
+#| fig-cap: Strip plot showing the hazard ratio estimates from models built on the 100 different training sets.
 #| label: fig-full-coefficients
 
 
 stripplot(term ~ exp(estimate), data = coef_long,
-        xlab = "Coefficient", ylab = "Model estimates")
+        xlab = "Hazard ratio estimates", ylab = "")
 ```
 
 The associated C-statistics calculated on the test observation and given in @fig-full-cstats
 
-```{r cstat}
+```{r}
 #| fig-cap: Density plot of the C-statistics calcualcted on the 100 test sets.
 #| label: fig-full-cstats
 
@@ -193,7 +233,13 @@ summary(acc[, c(surv.cindex)])
 densityplot(~ surv.cindex, data = acc)
 ```
 
+So, even with a comprehensive SAP, there is not much stopping a researcher from choosen the model that results in the "best" C-statistic when applied to that particular test set.
+Here, we could^[If we really wanted to do some bad statistical practice.] pick the model built on the `r acc[, which.max(surv.cindex)]`$^{th}$ training-test split, as this gave a C-statistic of `r round(acc[, max(surv.cindex)], 4)`.
+
+
 ## Data splitting with stepwise selection
+
+In this section, in each training-test split, the model is built on the training set using stepwise variable selection, starting with the full model and adding/ removing variables based on the AIC.
 
 ```{r}
 # load data
@@ -202,6 +248,8 @@ gbsg <- as.data.table(mlr3::tsk("gbsg")$data())
 n_x <- nrow(gbsg)
 n1 <- 0.7 # size of training set
 ```
+
+First, create a data.table where each row consists of a model `.id`, and then the `r floor(n1 * n_x)` indices which are included in the `.id`$^{th}$ training set.
 
 ```{r}
 set.seed(1)
@@ -220,10 +268,13 @@ new_names <- c(".id", paste0("idx_", seq_len(ncol(training_idx) - 1)))
 setnames(training_idx, old = old_names, new = new_names)
 
 training_idx[1:5, 1:12]
+```
 
+Now, we build the `r iters` models on the random training sets, and calculate the associated C-statistic on the test set. Note that, unlike the previous example, here the variables chosen in each model could be different between models.
 
+```{r}
 # split data into training and test sets
-# and obtain cox coefs
+# and obtain cox coefs and C-statistics
 models <- training_idx[, {
   tmp_train <- gbsg[unlist(.SD)]
   tmp_test <- gbsg[-unlist(.SD)]
@@ -238,21 +289,18 @@ models <- training_idx[, {
   lp_tmp <- predict(cox_step_tmp, 
                     newdata = tmp_test, type = "lp")
   # obtain c-statistic using linear predictor
-  # see callout note below for why `reverse = TRUE` is required
   c_stat <- concordance(Surv(tmp_test$time, tmp_test$status) ~ lp_tmp, 
                         reverse = TRUE) 
   data.table(as.data.table(tidy(cox_step_tmp)),
              c = c_stat$concordance)
 }, by = .id] 
+```
 
+@fig-stepwise-models gives the proportion that each model is output using stepwise variable selection. Overall, there are 16 different models created from applying the stepwise procedure to the `r iters` random training sets.
 
-### plots
-
-# C-statistics
-c_stats <- models[, .(cstat = unique(c)), by = .id]
-#c_stats[order(cstat, decreasing = TRUE)]
-summary(c_stats[, cstat])
-densityplot(~ cstat, data = c_stats)
+```{r}
+#| fig-cap: Proportion that each model is chosen using the stepwise variable selection procedure.
+#| label: fig-stepwise-models
 
 # Model factors:
 # predictors in model
@@ -274,6 +322,50 @@ proportion_model_variables[,
            terms_string := factor(terms_string, levels = terms_string[order(prop)])]  
 
 barchart(terms_string ~ prop, proportion_model_variables)
+```
+
+The coefficient estimates (when the variables were chosen to be in a model) are shown in @fig-stepwise-hr.
+
+```{r}
+#| fig-cap: Hazard ratio estimates for the models built using stepwise selection on the 100 different training sets.
+#| label: fig-stepwise-hr
+
+# coefficient estimates (donor factors)
+stripplot(term ~ exp(estimate), data = models, 
+          xlab = "Hazard ratio estimate", ylab = "")
 
 ```
 
+The C-statistics calcualted on the test sets associated with the `r iters` different models are shown in @fig-stepwise-cstats.
+
+```{r}
+#| label: fig-stepwise-cstats
+#| fig-cap: Density plot of the C-statistics calcualcted on the 100 test sets.
+
+# C-statistics
+c_stats <- models[, .(cstat = unique(c)), by = .id]
+#c_stats[order(cstat, decreasing = TRUE)]
+summary(c_stats[, cstat])
+densityplot(~ cstat, data = c_stats)
+```
+
+# Conclusion
+
+Here, I've shown, via simulation, the effect on model building and validation from splitting the data, building the model on the training set and validating using the test set. There are a few things to consider:
+
+1. Uncertainty should be reported: the [Code of Practice for Statistics](https://code.statisticsauthority.gov.uk/) states that "bias and uncertainty should be identified and explained to users" (Q2.4). If we are building a DRI using point estimates, this is especially important, as we need to explain why *that particular training set and model* was chosen (if data-splitting and stepwise selection were used).
+2. The large variance of the final model chosen via the stepwise selection process is not just a result of data-splitting but is inherent in the procedure. This can be simulated via bootstrapping the full sample (discussed in Frank Harrell's [course
+notes](https://hbiostat.org/rmsc/multivar#sec-multivar-variable-selection)).
+3. Model building and validation techniques that are currently used need to be justifiable and justified -- relying on historical precedence isn't enough.
+    - Data splitting leads to poor performing prediction models [see @steyerberg2018validation; @collins2024evaluation].
+    - Stepwise selection violates many of the assumptions underlying the final model, resulting in standard errors that are too low, narrow confidence intervals, and a increase in false-positive results. In addition, the coefficient estimates are biased high when chosen in the model [@harrell2001regression].
+
+As discussed in @collins2024evaluation and @harrell2001regression (and plenty of other places), building and validating the model on the full dataset is preferable to data splitting. Bootstrapping is required for the validation step, to be able to estimate (and remove) the bias in the validation measure -- a result of building and validating the model on the same data. An example of this technique is given in @steyerberg2003internal.
+
+Choosing predictors based on literature review and expert knowledge is recommended in @efthimiou2024developing, where they state:
+
+> Stepwise methods for variable selection ... are not recommended because they might lead to bias in estimation and worse predictive performance.
+
+# Fin
+ 
+  
