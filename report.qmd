@@ -111,6 +111,7 @@ First, we'll load some packages.
 
 library(data.table)    
 library(survival)
+library(survminer)
 library(broom) # tidy
 library(mlr3)
 library(mlr3viz)
