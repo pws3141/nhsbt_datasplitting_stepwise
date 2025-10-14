@@ -193,7 +193,11 @@ bmr = benchmark(design, store_models = TRUE)
 ```
 
 
-Now `r iters` models have been built, let's look at the hazard ratio estimates. Each dot in @fig-full-coefficients is one coefficient estimate. We can compare the spread of these estimates to the confidence intervals given in @fig-single-hr -- we see that they are similar. However, when the point estimate is the element that is used (for example, in donor risk indices), it is important to show how the particular choice of coefficient estimate affects the DRI.
+Now `r iters` models have been built, let's look at the hazard ratio estimates. Each dot in @fig-full-coefficients is one coefficient estimate. We can compare the spread of these estimates to the confidence intervals given in @fig-single-hr -- we see that they are similar. However, two points:
+
+1. When point estimates are used directly -- for example, in donor risk indices -- it is important to illustrate how the particular set of coefficient estimates affects the resulting score (e.g. the DRI value).
+2. The confidence intervals in @fig-single-hr are univariate, whereas the hazard ratio estimates are often correlated (for instance, if `grade3` is higher than expected, `grade2` may be lower). Small correlated shifts in several coefficients can therefore have a large combined effect on model predictions. This joint behaviour is not visible in @fig-single-hr but becomes evident through repeated sampling or sensitivity analysis.
+
 
 ```{r params}
 # estimated (donor) parameters
