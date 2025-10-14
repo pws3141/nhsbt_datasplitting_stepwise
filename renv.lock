@@ -438,55 +438,6 @@
       "NeedsCompilation": "yes",
       "Repository": "CRAN"
     },
-    "bbotk": {
-      "Package": "bbotk",
-      "Version": "1.6.0",
-      "Source": "Repository",
-      "Title": "Black-Box Optimization Toolkit",
-      "Authors@R": "c( person(\"Marc\", \"Becker\", , \"marcbecker@posteo.de\", role = c(\"cre\", \"aut\"), comment = c(ORCID = \"0000-0002-8115-0400\")), person(\"Jakob\", \"Richter\", , \"jakob1richter@gmail.com\", role = \"aut\", comment = c(ORCID = \"0000-0003-4481-5554\")), person(\"Michel\", \"Lang\", , \"michellang@gmail.com\", role = \"aut\", comment = c(ORCID = \"0000-0001-9754-0393\")), person(\"Bernd\", \"Bischl\", , \"bernd_bischl@gmx.net\", role = \"aut\", comment = c(ORCID = \"0000-0001-6002-6980\")), person(\"Martin\", \"Binder\", , \"martin.binder@mail.com\", role = \"aut\"), person(\"Olaf\", \"Mersmann\", , \"olafm@statistik.tu-dortmund.de\", role = \"ctb\") )",
-      "Description": "Features highly configurable search spaces via the 'paradox' package and optimizes every user-defined objective function. The package includes several optimization algorithms e.g. Random Search, Iterated Racing, Bayesian Optimization (in 'mlr3mbo') and Hyperband (in 'mlr3hyperband'). bbotk is the base package of 'mlr3tuning', 'mlr3fselect' and 'miesmuschel'.",
-      "License": "LGPL-3",
-      "URL": "https://bbotk.mlr-org.com, https://github.com/mlr-org/bbotk",
-      "BugReports": "https://github.com/mlr-org/bbotk/issues",
-      "Depends": [
-        "paradox (>= 1.0.0)",
-        "R (>= 3.1.0)"
-      ],
-      "Imports": [
-        "checkmate (>= 2.0.0)",
-        "cli",
-        "data.table",
-        "lgr",
-        "methods",
-        "mlr3misc (>= 0.15.1)",
-        "R6"
-      ],
-      "Suggests": [
-        "adagio",
-        "emoa",
-        "GenSA",
-        "irace (>= 4.0.0)",
-        "knitr",
-        "mirai",
-        "nloptr",
-        "processx",
-        "progressr",
-        "redux",
-        "RhpcBLASctl",
-        "rush (>= 0.2.0)",
-        "testthat (>= 3.0.0)"
-      ],
-      "Config/testthat/edition": "3",
-      "Config/testthat/parallel": "false",
-      "Encoding": "UTF-8",
-      "Language": "en-US",
-      "NeedsCompilation": "yes",
-      "RoxygenNote": "7.3.2",
-      "Collate": "'Archive.R' 'ArchiveAsync.R' 'ArchiveAsyncFrozen.R' 'ArchiveBatch.R' 'CallbackAsync.R' 'CallbackBatch.R' 'Codomain.R' 'ContextAsync.R' 'ContextBatch.R' 'Objective.R' 'ObjectiveRFun.R' 'ObjectiveRFunDt.R' 'ObjectiveRFunMany.R' 'OptimInstance.R' 'OptimInstanceAsync.R' 'OptimInstanceAsyncMultiCrit.R' 'OptimInstanceAsyncSingleCrit.R' 'OptimInstanceBatch.R' 'OptimInstanceBatchMultiCrit.R' 'OptimInstanceBatchSingleCrit.R' 'OptimInstanceMultiCrit.R' 'OptimInstanceSingleCrit.R' 'mlr_optimizers.R' 'Optimizer.R' 'OptimizerAsync.R' 'OptimizerAsyncDesignPoints.R' 'OptimizerAsyncGridSearch.R' 'OptimizerAsyncRandomSearch.R' 'OptimizerBatch.R' 'OptimizerBatchChain.R' 'OptimizerBatchCmaes.R' 'OptimizerBatchDesignPoints.R' 'OptimizerBatchFocusSearch.R' 'OptimizerBatchGenSA.R' 'OptimizerBatchGridSearch.R' 'OptimizerBatchIrace.R' 'OptimizerBatchLocalSearch.R' 'OptimizerBatchNLoptr.R' 'OptimizerBatchRandomSearch.R' 'Progressor.R' 'mlr_terminators.R' 'Terminator.R' 'TerminatorClockTime.R' 'TerminatorCombo.R' 'TerminatorEvals.R' 'TerminatorNone.R' 'TerminatorPerfReached.R' 'TerminatorRunTime.R' 'TerminatorStagnation.R' 'TerminatorStagnationBatch.R' 'TerminatorStagnationHypervolume.R' 'as_terminator.R' 'assertions.R' 'bb_optimize.R' 'bbotk_reflections.R' 'bibentries.R' 'helper.R' 'mlr_callbacks.R' 'nds_selection.R' 'reexport.R' 'sugar.R' 'worker_loops.R' 'zzz.R'",
-      "Author": "Marc Becker [cre, aut] (ORCID: <https://orcid.org/0000-0002-8115-0400>), Jakob Richter [aut] (ORCID: <https://orcid.org/0000-0003-4481-5554>), Michel Lang [aut] (ORCID: <https://orcid.org/0000-0001-9754-0393>), Bernd Bischl [aut] (ORCID: <https://orcid.org/0000-0001-6002-6980>), Martin Binder [aut], Olaf Mersmann [ctb]",
-      "Maintainer": "Marc Becker <marcbecker@posteo.de>",
-      "Repository": "CRAN"
-    },
     "boot": {
       "Package": "boot",
       "Version": "1.3-31",
@@ -2995,96 +2946,6 @@
       "Maintainer": "Marc Becker <marcbecker@posteo.de>",
       "Repository": "CRAN"
     },
-    "mlr3fselect": {
-      "Package": "mlr3fselect",
-      "Version": "1.3.0",
-      "Source": "Repository",
-      "Title": "Feature Selection for 'mlr3'",
-      "Authors@R": "c( person(\"Marc\", \"Becker\", , \"marcbecker@posteo.de\", role = c(\"aut\", \"cre\"), comment = c(ORCID = \"0000-0002-8115-0400\")), person(\"Patrick\", \"Schratz\", , \"patrick.schratz@gmail.com\", role = \"aut\", comment = c(ORCID = \"0000-0003-0748-6624\")), person(\"Michel\", \"Lang\", , \"michellang@gmail.com\", role = \"aut\", comment = c(ORCID = \"0000-0001-9754-0393\")), person(\"Bernd\", \"Bischl\", , \"bernd_bischl@gmx.net\", role = \"aut\", comment = c(ORCID = \"0000-0001-6002-6980\")), person(\"John\", \"Zobolas\", , \"bblodfon@gmail.com\", role = \"aut\", comment = c(ORCID = \"0000-0002-3609-8674\")) )",
-      "Description": "Feature selection package of the 'mlr3' ecosystem. It selects the optimal feature set for any 'mlr3' learner. The package works with several optimization algorithms e.g. Random Search, Recursive Feature Elimination, and Genetic Search. Moreover, it can automatically optimize learners and estimate the performance of optimized feature sets with nested resampling.",
-      "License": "LGPL-3",
-      "URL": "https://mlr3fselect.mlr-org.com, https://github.com/mlr-org/mlr3fselect",
-      "BugReports": "https://github.com/mlr-org/mlr3fselect/issues",
-      "Depends": [
-        "mlr3 (>= 0.21.1)",
-        "R (>= 3.1.0)"
-      ],
-      "Imports": [
-        "bbotk (>= 1.2.0)",
-        "checkmate (>= 2.0.0)",
-        "data.table",
-        "lgr",
-        "mlr3misc (>= 0.15.1)",
-        "paradox (>= 1.0.0)",
-        "R6",
-        "stabm"
-      ],
-      "Suggests": [
-        "e1071",
-        "genalg",
-        "mlr3learners",
-        "mlr3pipelines",
-        "rpart",
-        "fastVoteR",
-        "testthat (>= 3.0.0)"
-      ],
-      "Config/testthat/edition": "3",
-      "Config/testthat/parallel": "true",
-      "Encoding": "UTF-8",
-      "Language": "en-US",
-      "NeedsCompilation": "no",
-      "RoxygenNote": "7.3.2",
-      "Collate": "'ArchiveBatchFSelect.R' 'AutoFSelector.R' 'CallbackBatchFSelect.R' 'ContextBatchFSelect.R' 'EnsembleFSResult.R' 'FSelectInstanceBatchSingleCrit.R' 'FSelectInstanceBatchMultiCrit.R' 'mlr_fselectors.R' 'FSelector.R' 'FSelectorBatch.R' 'FSelectorBatchDesignPoints.R' 'FSelectorBatchExhaustiveSearch.R' 'FSelectorBatchFromOptimizerBatch.R' 'FSelectorBatchGeneticSearch.R' 'FSelectorBatchRFE.R' 'FSelectorBatchRFECV.R' 'FSelectorBatchRandomSearch.R' 'FSelectorBatchSequential.R' 'FSelectorBatchShadowVariableSearch.R' 'ObjectiveFSelect.R' 'ObjectiveFSelectBatch.R' 'assertions.R' 'auto_fselector.R' 'bibentries.R' 'embedded_ensemble_fselect.R' 'ensemble_fselect.R' 'extract_inner_fselect_archives.R' 'extract_inner_fselect_results.R' 'fselect.R' 'fselect_nested.R' 'helper.R' 'mlr_callbacks.R' 'reexports.R' 'sugar.R' 'zzz.R'",
-      "Author": "Marc Becker [aut, cre] (<https://orcid.org/0000-0002-8115-0400>), Patrick Schratz [aut] (<https://orcid.org/0000-0003-0748-6624>), Michel Lang [aut] (<https://orcid.org/0000-0001-9754-0393>), Bernd Bischl [aut] (<https://orcid.org/0000-0001-6002-6980>), John Zobolas [aut] (<https://orcid.org/0000-0002-3609-8674>)",
-      "Maintainer": "Marc Becker <marcbecker@posteo.de>",
-      "Repository": "CRAN"
-    },
-    "mlr3learners": {
-      "Package": "mlr3learners",
-      "Version": "0.12.0",
-      "Source": "Repository",
-      "Title": "Recommended Learners for 'mlr3'",
-      "Authors@R": "c( person(\"Michel\", \"Lang\", , \"michellang@gmail.com\", role = \"aut\", comment = c(ORCID = \"0000-0001-9754-0393\")), person(\"Quay\", \"Au\", , \"quayau@gmail.com\", role = \"aut\", comment = c(ORCID = \"0000-0002-5252-8902\")), person(\"Stefan\", \"Coors\", , \"mail@stefancoors.de\", role = \"aut\", comment = c(ORCID = \"0000-0002-7465-2146\")), person(\"Patrick\", \"Schratz\", , \"patrick.schratz@gmail.com\", role = \"aut\", comment = c(ORCID = \"0000-0003-0748-6624\")), person(\"Marc\", \"Becker\", , \"marcbecker@posteo.de\", role = c(\"cre\", \"aut\"), comment = c(ORCID = \"0000-0002-8115-0400\")), person(\"John\", \"Zobolas\", , \"bblodfon@gmail.com\", role = \"aut\", comment = c(ORCID = \"0000-0002-3609-8674\")) )",
-      "Description": "Recommended Learners for 'mlr3'. Extends 'mlr3' with interfaces to essential machine learning packages on CRAN.  This includes, but is not limited to: (penalized) linear and logistic regression, linear and quadratic discriminant analysis, k-nearest neighbors, naive Bayes, support vector machines, and gradient boosting.",
-      "License": "LGPL-3",
-      "URL": "https://mlr3learners.mlr-org.com, https://github.com/mlr-org/mlr3learners",
-      "BugReports": "https://github.com/mlr-org/mlr3learners/issues",
-      "Depends": [
-        "mlr3 (>= 0.23.0)",
-        "R (>= 3.1.0)"
-      ],
-      "Imports": [
-        "checkmate",
-        "data.table",
-        "mlr3misc (>= 0.9.4)",
-        "paradox (>= 1.0.0)",
-        "R6"
-      ],
-      "Suggests": [
-        "DiceKriging",
-        "e1071",
-        "glmnet",
-        "kknn",
-        "knitr",
-        "lgr",
-        "MASS",
-        "nnet",
-        "pracma",
-        "ranger",
-        "rgenoud",
-        "rmarkdown",
-        "testthat (>= 3.0.0)",
-        "xgboost (>= 1.6.0)"
-      ],
-      "Config/testthat/edition": "3",
-      "Encoding": "UTF-8",
-      "NeedsCompilation": "no",
-      "RoxygenNote": "7.3.2",
-      "Collate": "'aaa.R' 'LearnerClassifCVGlmnet.R' 'LearnerClassifGlmnet.R' 'LearnerClassifKKNN.R' 'LearnerClassifLDA.R' 'LearnerClassifLogReg.R' 'LearnerClassifMultinom.R' 'LearnerClassifNaiveBayes.R' 'LearnerClassifNnet.R' 'LearnerClassifQDA.R' 'LearnerClassifRanger.R' 'LearnerClassifSVM.R' 'LearnerClassifXgboost.R' 'LearnerRegrCVGlmnet.R' 'LearnerRegrGlmnet.R' 'LearnerRegrKKNN.R' 'LearnerRegrKM.R' 'LearnerRegrLM.R' 'LearnerRegrNnet.R' 'LearnerRegrRanger.R' 'LearnerRegrSVM.R' 'LearnerRegrXgboost.R' 'bibentries.R' 'helpers.R' 'helpers_glmnet.R' 'helpers_ranger.R' 'zzz.R'",
-      "Author": "Michel Lang [aut] (ORCID: <https://orcid.org/0000-0001-9754-0393>), Quay Au [aut] (ORCID: <https://orcid.org/0000-0002-5252-8902>), Stefan Coors [aut] (ORCID: <https://orcid.org/0000-0002-7465-2146>), Patrick Schratz [aut] (ORCID: <https://orcid.org/0000-0003-0748-6624>), Marc Becker [cre, aut] (ORCID: <https://orcid.org/0000-0002-8115-0400>), John Zobolas [aut] (ORCID: <https://orcid.org/0000-0002-3609-8674>)",
-      "Maintainer": "Marc Becker <marcbecker@posteo.de>",
-      "Repository": "CRAN"
-    },
     "mlr3measures": {
       "Package": "mlr3measures",
       "Version": "1.0.0",
@@ -4386,45 +4247,6 @@
       "RemoteRepo": "set6",
       "RemoteRef": "main",
       "RemoteSha": "a901255c26614a0ece317dc849621420f9393d42"
-    },
-    "stabm": {
-      "Package": "stabm",
-      "Version": "1.2.2",
-      "Source": "Repository",
-      "Title": "Stability Measures for Feature Selection",
-      "Authors@R": "c(person(given = \"Andrea\", family = \"Bommert\", role = c(\"aut\", \"cre\"), email = \"bommert@statistik.tu-dortmund.de\", comment = c(ORCID = \"0000-0002-1005-9351\")), person(given = \"Michel\", family = \"Lang\", role = \"aut\", email = \"michellang@gmail.com\", comment = c(ORCID = \"0000-0001-9754-0393\")))",
-      "Description": "An implementation of many measures for the assessment of the stability of feature selection. Both simple measures and measures which take into account the similarities between features are available, see Bommert (2020) <doi:10.17877/DE290R-21906>.",
-      "License": "LGPL-3",
-      "URL": "https://bommert.github.io/stabm/, https://github.com/bommert/stabm",
-      "BugReports": "https://github.com/bommert/stabm/issues",
-      "Depends": [
-        "R (>= 3.5.0)"
-      ],
-      "Imports": [
-        "checkmate (>= 1.8.5)",
-        "Matrix (>= 1.5-0)",
-        "methods",
-        "stats",
-        "utils"
-      ],
-      "Suggests": [
-        "cowplot (>= 0.9.2)",
-        "ggdendro (>= 0.1-20)",
-        "ggplot2 (>= 3.0.0)",
-        "igraph (>= 1.2.1)",
-        "knitr",
-        "mlbench",
-        "rmarkdown",
-        "rpart",
-        "testthat (>= 2.0.0)"
-      ],
-      "VignetteBuilder": "knitr",
-      "Encoding": "UTF-8",
-      "RoxygenNote": "7.2.2",
-      "NeedsCompilation": "no",
-      "Author": "Andrea Bommert [aut, cre] (<https://orcid.org/0000-0002-1005-9351>), Michel Lang [aut] (<https://orcid.org/0000-0001-9754-0393>)",
-      "Maintainer": "Andrea Bommert <bommert@statistik.tu-dortmund.de>",
-      "Repository": "CRAN"
     },
     "stringi": {
       "Package": "stringi",

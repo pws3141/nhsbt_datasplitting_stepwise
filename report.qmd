@@ -115,9 +115,7 @@ library(survminer)
 library(broom) # tidy
 library(mlr3)
 library(mlr3viz)
-library(mlr3learners)
 library(mlr3proba) # survival
-library(mlr3fselect) # feature selection
 library(lattice)
 
 # number of random splits
