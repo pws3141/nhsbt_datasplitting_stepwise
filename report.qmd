@@ -222,7 +222,7 @@ stripplot(term ~ exp(estimate), data = coef_long,
         xlab = "Hazard ratio estimates", ylab = "")
 ```
 
-The associated C-statistics calculated on the test observation and given in @fig-full-cstats
+The associated C-statistics calculated on the test observation are given in @fig-full-cstats
 
 ```{r}
 #| fig-cap: Density plot of the C-statistics calcualcted on the 100 test sets.
@@ -250,7 +250,7 @@ n_x <- nrow(gbsg)
 n1 <- 0.7 # size of training set
 ```
 
-First, create a data.table where each row consists of a model `.id`, and then the `r floor(n1 * n_x)` indices which are included in the `.id`$^{th}$ training set.
+First, create a data.table where each row consists of a model `.id`, and then the `floor(0.7 x n) =` `r floor(n1 * n_x)` indices which are included in the `.id`$^{th}$ training set.
 
 ```{r}
 set.seed(1)
@@ -337,7 +337,7 @@ stripplot(term ~ exp(estimate), data = models,
 
 ```
 
-The C-statistics calcualted on the test sets associated with the `r iters` different models are shown in @fig-stepwise-cstats.
+The C-statistics calculated on the test sets associated with the `r iters` different models are shown in @fig-stepwise-cstats.
 
 ```{r}
 #| label: fig-stepwise-cstats
@@ -363,7 +363,7 @@ notes](https://hbiostat.org/rmsc/multivar#sec-multivar-variable-selection)).
 
 As discussed in @collins2024evaluation and @harrell2001regression (and plenty of other places), building and validating the model on the full dataset is preferable to data splitting. Bootstrapping is required for the validation step, to be able to estimate (and remove) the bias in the validation measure -- a result of building and validating the model on the same data. An example of this technique is given in @steyerberg2003internal.
 
-Choosing predictors based on literature review and expert knowledge is recommended in @efthimiou2024developing, where they state:
+@efthimiou2024developing recommend that we "should identify potential predictors based on the literature review and expert knowledge", and additionally state,
 
 > Stepwise methods for variable selection ... are not recommended because they might lead to bias in estimation and worse predictive performance.
 
